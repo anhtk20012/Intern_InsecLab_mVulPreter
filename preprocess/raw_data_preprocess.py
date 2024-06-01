@@ -2,12 +2,11 @@ import pandas as pd
 import os
 import difflib
 import pickle
+from pathlib import Path
 
 def process_raw_data(filter_csv_path, raw_csv_path):
     if os.path.exists(filter_csv_path):
         pd_filter = pd.read_csv(filter_csv_path)
-        # pd_filter = pd.read_csv('/home/MSR_data_cleaned_pairs_Test.csv')
-
     else:
         pd_raw = pd.read_csv(raw_csv_path)
         filter_csv = pd_raw.loc[pd_raw["vul"] == 1]
@@ -36,18 +35,22 @@ def label(f_vul, f_novul ,label_dict, outfile):
         
 
 def main():
-    dataset_path = '/home/mVulPreter/dataset/'
+    dataset_path = Path(__file__).parent.parent / "dataset"
     raw_data_path = 'raw_data/'
+    Path(dataset_path / raw_data_path).mkdir(exist_ok=True, parents=True)
     raw_data_filename = 'MSR_data_cleaned.csv'
     filter_data_filename = 'MSR_data_filtered.csv'
 
     dataset_path_output = 'dataset_test/'
+    Path(dataset_path / dataset_path_output).mkdir(exist_ok=True, parents=True)
+    
     label_pkl_file = 'test_label_pkl.pkl'
     
-    filter_csv_path = dataset_path + raw_data_path + filter_data_filename
-    raw_csv_path = dataset_path + raw_data_path + raw_data_filename
-    output_path = dataset_path + dataset_path_output
-    pkl_path = dataset_path + label_pkl_file
+    filter_csv_path = dataset_path / Path(raw_data_path + filter_data_filename)
+    raw_csv_path = dataset_path / Path(raw_data_path + raw_data_filename)
+
+    output_path = dataset_path / dataset_path_output
+    pkl_path = dataset_path / label_pkl_file
 
     pd_filter = process_raw_data(filter_csv_path, raw_csv_path)
     file_cnt = pd_filter.shape[0]
@@ -61,7 +64,7 @@ def main():
         project_name = row["project"]
         hash_vaule = row['commit_id']
         file_name = project_name + "_" + hash_vaule
-        outfile = output_path + file_name
+        outfile = str(output_path) + "/" + file_name
 
         file_name_cnt = 0
         outfile_new = outfile
@@ -82,15 +85,15 @@ def main():
         with open(outfile_new + '/'+ vul_file_name, 'w', encoding='utf-8') as f_vul:
             f_vul.write(func_before)
             cnt_1 += 1
-
+        
         with open(outfile_new + '/' + novul_file_name, 'w', encoding='utf-8') as f_novul:
             f_novul.write(func_after)
             cnt_1 += 1
 
         if pd.isnull(row['lines_before']):
             label_dict[outfile_new] = ['']
-        else:
-            label(func_before, func_after, label_dict, outfile_new)
+        # else:
+        #     label(func_before, func_after, label_dict, outfile_new)
 
     with open(pkl_path,'wb') as f:
         pickle.dump(label_dict, f)

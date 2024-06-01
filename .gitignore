@@ -4,4 +4,4 @@ temp/
 complete_pdg_dot/
 dataset_vul_novul_patch/
 subgraph_dot/
-code_normalize/__pycache__
+preprocess/code_normalize/__pycache__/
