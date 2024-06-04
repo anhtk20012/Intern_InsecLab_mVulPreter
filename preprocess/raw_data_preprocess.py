@@ -36,36 +36,33 @@ def label(f_vul, f_novul ,label_dict, outfile):
 
 def main():
     dataset_path = Path(__file__).parent.parent / "dataset"
-    raw_data_path = 'raw_data/'
-    Path(dataset_path / raw_data_path).mkdir(exist_ok=True, parents=True)
+    raw_data_path = 'raw_data'
     raw_data_filename = 'MSR_data_cleaned.csv'
     filter_data_filename = 'MSR_data_filtered.csv'
+    raw_csv_path = dataset_path / raw_data_path / raw_data_filename
+    filter_csv_path = dataset_path / raw_data_path / filter_data_filename
 
-    dataset_path_output = 'dataset_test/'
+    
+    dataset_path_output = 'all_dataset'
+    label_pkl_file = 'func_label.pkl'
     Path(dataset_path / dataset_path_output).mkdir(exist_ok=True, parents=True)
-    
-    label_pkl_file = 'test_label_pkl.pkl'
-    
-    filter_csv_path = dataset_path / Path(raw_data_path + filter_data_filename)
-    raw_csv_path = dataset_path / Path(raw_data_path + raw_data_filename)
-
     output_path = dataset_path / dataset_path_output
     pkl_path = dataset_path / label_pkl_file
-
+    print("======== Process raw data ========")
     pd_filter = process_raw_data(filter_csv_path, raw_csv_path)
     file_cnt = pd_filter.shape[0]
     file_num = 0
     label_dict = {}
     cnt_1 = 0
-
+    print("======== Write data file ========")
     for index, row in pd_filter.iterrows():
         file_num += 1
-        print(str(file_cnt) + ' / ' + str(file_num))
+        # print(str(file_cnt) + ' / ' + str(file_num))
         project_name = row["project"]
         hash_vaule = row['commit_id']
         file_name = project_name + "_" + hash_vaule
-        outfile = str(output_path) + "/" + file_name
-
+        outfile = str(output_path / file_name)
+        
         file_name_cnt = 0
         outfile_new = outfile
         while outfile_new in label_dict.keys():
@@ -92,14 +89,11 @@ def main():
 
         if pd.isnull(row['lines_before']):
             label_dict[outfile_new] = ['']
-        # else:
-        #     label(func_before, func_after, label_dict, outfile_new)
 
     with open(pkl_path,'wb') as f:
         pickle.dump(label_dict, f)
 
-    print(cnt_1)
-
+    print("Total vul and novul:",cnt_1)
 
 if __name__ == '__main__':
     main()

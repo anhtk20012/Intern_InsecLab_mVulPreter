@@ -15,3 +15,12 @@ else
     echo "Already downloaded bigvul data"
 fi
 
+cd ~/
+if [[ ! -d joern-cli_v1.1.172 ]]; then
+    wget https://github.com/joernio/joern/releases/download/v1.1.172/joern-cli.zip
+    unzip joern-cli.zip
+    rm joern-cli.zip
+    mv joern-cli joern-cli_v1.1.172
+else
+    echo "Already downloaded Joern v1.1.172"
+fi
